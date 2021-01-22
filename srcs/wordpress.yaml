@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordpress-service
+  annotations:
+    metallb.universe.tf/address-pool: default
+    metallb.universe.tf/allow-shared-ip: shared
+  labels:
+    app: wordpress-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: wordpress-deployment
+  ports:
+  - port: 5050
+    name: wps-prt
+    targetPort: 5050
+    protocol: TCP
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: wordpress-deployment
+  name: wordpress-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wordpress-deployment
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: wordpress-deployment
+    spec:
+      containers:
+      - image: wordpress
+        name: wordpress
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5050
+          name: wp-prt
+        env:
+        - name: WP_DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: wordpress-db-name
+        - name: WP_DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: wordpress-mysql-db-user
+        - name: WP_DB_PASSWD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: wordpress-mysql-db-passwd
+        - name: WP_DB_TABLE_PREFIX
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: wordpress-db-table-prefix
+        - name: WP_DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: wp-db-configmap
+              key: wp-db-host

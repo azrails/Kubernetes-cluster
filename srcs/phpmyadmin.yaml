@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: phpmyadmin-service
+  annotations:
+    metallb.universe.tf/address-pool: default
+    metallb.universe.tf/allow-shared-ip: shared
+  labels:
+    app: phpmyadmin-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: phpmyadmin-deployment
+  ports:
+  - port: 5000
+    name: phpmy-prt
+    targetPort: 5000
+    protocol: TCP
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: phpmyadmin-deployment
+  name: phpmyadmin-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: phpmyadmin-deployment
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: phpmyadmin-deployment
+    spec:
+      containers:
+      - image: phpmyadmin
+        name: phpmyadmin
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5000
+          name: pmy-prt

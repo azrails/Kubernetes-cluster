@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  annotations:
+    metallb.universe.tf/address-pool: default
+    metallb.universe.tf/allow-shared-ip: shared
+  labels:
+    app: nginx-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: nginx-deployment
+  ports:
+  - port: 22
+    name: ssh
+    targetPort: 22
+    protocol: TCP
+  - port: 80
+    name: http
+    targetPort: 80
+    protocol: TCP
+  - port: 443
+    name: https
+    targetPort: 443
+    protocol: TCP
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: nginx-deployment
+  name: nginx-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-deployment
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: nginx-deployment
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 22
+          name: ssh-port
+        - containerPort: 80
+          name: http-port
+        - containerPort: 443
+          name: https-port
