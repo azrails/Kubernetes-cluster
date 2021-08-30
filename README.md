@@ -6,4 +6,4 @@
 - phpmyadmin
 - wordpress
 - nginx
-- metallb(load balancer)
+- metallb (load balancer)
